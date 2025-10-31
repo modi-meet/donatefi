@@ -1,5 +1,5 @@
-import { supabase } from './supabase'
-import { type Request, type DatabaseRequest, mapDatabaseRequestToRequest } from './user-types'
+import { supabase } from '@/lib/supabase'
+import { type Request, type DatabaseRequest, mapDatabaseRequestToRequest } from '@/lib/user-types'
 
 export class RequestService {
   /**
