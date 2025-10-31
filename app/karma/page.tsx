@@ -189,13 +189,7 @@ export default function KarmaPage() {
                 )}
               </Button>
 
-              {/* Treasury Info */}
-              <div className="p-3 bg-neutral-800/30 rounded-lg border border-neutral-700/50">
-                <div className="text-xs text-neutral-400 mb-1">ETH will be sent from:</div>
-                <div className="text-xs font-mono text-orange-400 break-all">
-                  0xb6ad1ad1637ad0f5c8dd7be68876f508e7e368f9
-                </div>
-              </div>
+             
 
               {/* Info Note */}
               <div className="text-xs text-neutral-500 text-center space-y-1">
