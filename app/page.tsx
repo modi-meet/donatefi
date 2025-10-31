@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronRight, Monitor, Settings, Shield, Target, Users, Bell, RefreshCw } from "lucide-react"
+import { ChevronRight, Monitor, Settings, Shield, Target, Users, Bell, RefreshCw, List } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import CommandCenterPage from "./command-center/page"
 import AgentNetworkPage from "./agent-network/page"
 import OperationsPage from "./operations/page"
 import IntelligencePage from "./intelligence/page"
 import SystemsPage from "./systems/page"
+import ListingsPage from "./listings/page"
 
 export default function TacticalDashboard() {
   const [activeSection, setActiveSection] = useState("overview")
@@ -44,6 +45,7 @@ export default function TacticalDashboard() {
               { id: "operations", icon: Target, label: "OPERATIONS" },
               { id: "intelligence", icon: Shield, label: "INTELLIGENCE" },
               { id: "systems", icon: Settings, label: "SYSTEMS" },
+              { id: "listings", icon: List, label: "LISTINGS" },
             ].map((item) => (
               <button
                 key={item.id}
@@ -87,7 +89,14 @@ export default function TacticalDashboard() {
         <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <div className="text-sm text-neutral-400">
-              TACTICAL COMMAND / <span className="text-orange-500">OVERVIEW</span>
+              TACTICAL COMMAND / <span className="text-orange-500">
+                {activeSection === "overview" && "OVERVIEW"}
+                {activeSection === "agents" && "AGENT NETWORK"}
+                {activeSection === "operations" && "OPERATIONS"}
+                {activeSection === "intelligence" && "INTELLIGENCE"}
+                {activeSection === "systems" && "SYSTEMS"}
+                {activeSection === "listings" && "LISTINGS"}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -108,6 +117,7 @@ export default function TacticalDashboard() {
           {activeSection === "operations" && <OperationsPage />}
           {activeSection === "intelligence" && <IntelligencePage />}
           {activeSection === "systems" && <SystemsPage />}
+          {activeSection === "listings" && <ListingsPage />}
         </div>
       </div>
     </div>
