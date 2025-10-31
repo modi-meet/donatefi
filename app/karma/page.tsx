@@ -108,7 +108,18 @@ export default function KarmaPage() {
                   <CheckCircle className="w-5 h-5" />
                   <span className="font-semibold">Success!</span>
                 </div>
-                <p className="text-sm text-neutral-300">{success}</p>
+                <p className="text-sm text-neutral-300 mb-2">{success}</p>
+                {success.includes('Transaction:') && (
+                  <a
+                    href={`https://sepolia.arbiscan.io/tx/${success.split('Transaction: ')[1]?.trim()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-orange-400 hover:text-orange-300 underline flex items-center gap-1"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    View on Arbitrum Sepolia Explorer
+                  </a>
+                )}
               </div>
             )}
 

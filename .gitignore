@@ -25,6 +25,10 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.local
+
+# Treasury private key (never commit)
+TREASURY_PRIVATE_KEY
 
 # vercel
 .vercel

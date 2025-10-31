@@ -87,71 +87,47 @@ export class ArbitrumConverter {
 
   /**
    * Send ETH from treasury wallet to user's wallet on Arbitrum Sepolia
+   * Calls backend API to execute the transaction
    */
   static async claimEthForKarma(
     karmaPoints: number,
     userAddress: string
   ): Promise<{ success: boolean; txHash?: string; message: string }> {
-    if (typeof window === 'undefined' || !window.ethereum) {
-      throw new Error('MetaMask not found. Please install MetaMask.')
+    if (typeof window === 'undefined') {
+      throw new Error('This function can only be called from the browser')
     }
 
     try {
-      // Switch to Arbitrum Sepolia
-      await this.switchToArbitrumSepolia()
-
-      // Verify we're on Arbitrum Sepolia
-      const isOnArbitrum = await this.isOnArbitrumSepolia()
-      if (!isOnArbitrum) {
-        throw new Error('Please switch to Arbitrum Sepolia network')
+      // Switch to Arbitrum Sepolia for user
+      if (window.ethereum) {
+        await this.switchToArbitrumSepolia()
       }
 
       // Calculate ETH amount
       const ethAmount = this.karmaToEth(karmaPoints)
 
-      // Check if treasury wallet has sufficient balance
-      const treasuryBalance = await this.getEthBalance(this.TREASURY_WALLET)
-      if (parseFloat(treasuryBalance) < ethAmount) {
-        throw new Error(`Insufficient funds in treasury. Available: ${treasuryBalance} ETH, Required: ${ethAmount} ETH`)
-      }
+      // Call backend API to send ETH from treasury
+      const response = await fetch('/api/karma/claim', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          karmaPoints,
+          userAddress,
+        }),
+      })
 
-      // Request user to sign transaction from treasury wallet
-      // Note: This requires the treasury wallet to be connected or the user to have access
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      
-      // For security, we need to verify the connected wallet can sign for treasury
-      // In a production setup, you'd use a backend service with the treasury private key
-      // For now, we'll check if user is connected and then process the transfer
-      
-      const signer = await provider.getSigner()
-      const signerAddress = await signer.getAddress()
-      
-      // If signer is not the treasury wallet, we need backend assistance
-      // For frontend-only implementation, we'll show instructions
-      if (signerAddress.toLowerCase() !== this.TREASURY_WALLET.toLowerCase()) {
-        // In production, call your backend API that holds treasury private key
-        // Backend would send ETH from treasury to user
-        return {
-          success: true,
-          message: `Conversion request submitted! ${ethAmount} ETH will be sent from treasury wallet ${this.TREASURY_WALLET.slice(0, 6)}...${this.TREASURY_WALLET.slice(-4)} to your address ${userAddress.slice(0, 6)}...${userAddress.slice(-4)} on Arbitrum Sepolia.`,
-        }
-      }
+      const data = await response.json()
 
-      // If treasury wallet is connected, send directly
-      const amountWei = ethers.parseEther(ethAmount.toString())
-      const transaction = {
-        to: userAddress,
-        value: amountWei,
-        gasLimit: 21000,
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to claim ETH')
       }
-
-      const txResponse = await signer.sendTransaction(transaction)
-      await txResponse.wait()
 
       return {
         success: true,
-        txHash: txResponse.hash,
-        message: `Successfully sent ${ethAmount} ETH to your wallet! Transaction: ${txResponse.hash}`,
+        txHash: data.txHash,
+        message: data.message || `Successfully sent ${ethAmount} ETH to your wallet! Transaction: ${data.txHash}`,
       }
     } catch (error: any) {
       console.error('Error claiming ETH:', error)
