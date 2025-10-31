@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
 import {
   Search,
   MapPin,
@@ -16,8 +17,12 @@ import {
   Filter,
   SortAsc,
   Loader2,
+  ArrowRight,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react"
-import { mockListings, type Listing } from "@/lib/mock-listings"
+import { supabase } from "@/lib/supabase"
+import { type Listing, mapDatabaseListingToListing } from "@/lib/listing-types"
 
 type CategoryFilter = "All" | "Food" | "Education" | "Cloth" | "Others"
 type SortOption = "newest" | "quantity" | "quality"
@@ -26,18 +31,49 @@ export default function ListingsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("All")
   const [sortOption, setSortOption] = useState<SortOption>("newest")
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [listings, setListings] = useState<Listing[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  // Simulate loading state
+  // Fetch listings from Supabase
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const { data, error: fetchError } = await supabase
+          .from('listings')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (fetchError) {
+          throw fetchError
+        }
+
+        if (data) {
+          const mappedListings = data.map(mapDatabaseListingToListing)
+          setListings(mappedListings)
+        }
+      } catch (err: any) {
+        console.error('Error fetching listings:', err)
+        setError(err.message || 'Unable to load listings.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchListings()
+  }, [])
+
+  // Handle filter change
   const handleFilterChange = (category: CategoryFilter) => {
-    setLoading(true)
     setCategoryFilter(category)
-    setTimeout(() => setLoading(false), 300)
   }
 
   // Filter and sort listings
   const filteredAndSortedListings = useMemo(() => {
-    let filtered = mockListings.filter((listing) => {
+    let filtered = listings.filter((listing) => {
       const matchesCategory = categoryFilter === "All" || listing.category === categoryFilter
       const matchesSearch =
         searchTerm === "" ||
@@ -50,8 +86,8 @@ export default function ListingsPage() {
     const sorted = [...filtered].sort((a, b) => {
       switch (sortOption) {
         case "newest":
-          // Sort by ID (newer listings have higher IDs)
-          return parseInt(b.id.split("-")[1]) - parseInt(a.id.split("-")[1])
+          // Already sorted by created_at from Supabase, but maintain order
+          return 0 // Keep original order from database
         case "quantity":
           return b.quantity - a.quantity
         case "quality":
@@ -63,24 +99,24 @@ export default function ListingsPage() {
     })
 
     return sorted
-  }, [searchTerm, categoryFilter, sortOption])
+  }, [listings, searchTerm, categoryFilter, sortOption])
 
   // Category counts
   const categoryCounts = useMemo(() => {
     const counts = {
-      All: mockListings.length,
+      All: listings.length,
       Food: 0,
       Education: 0,
       Cloth: 0,
       Others: 0,
     }
-    mockListings.forEach((listing) => {
+    listings.forEach((listing) => {
       if (listing.category in counts) {
         counts[listing.category as keyof typeof counts]++
       }
     })
     return counts
-  }, [])
+  }, [listings])
 
   // Quality badge colors
   const getQualityColor = (quality: Listing["quality"]) => {
@@ -229,19 +265,44 @@ export default function ListingsPage() {
 
         {/* Results Count */}
         <div className="text-sm text-neutral-400">
-          Showing {filteredAndSortedListings.length} of {mockListings.length} listings
+          Showing {filteredAndSortedListings.length} of {listings.length} listings
         </div>
       </div>
 
+      {/* Error State */}
+      {error && (
+        <Card className="bg-red-500/10 border-red-500/30">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-red-400 mb-1">Unable to Load Listings</h3>
+                <p className="text-sm text-neutral-400">{error}</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.reload()}
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Loading State */}
-      {loading && (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+      {loading && !error && (
+        <div className="flex flex-col justify-center items-center py-20">
+          <Loader2 className="w-12 h-12 text-orange-500 animate-spin mb-4" />
+          <p className="text-neutral-400">Loading listings...</p>
         </div>
       )}
 
       {/* Listings Grid */}
-      {!loading && (
+      {!loading && !error && (
         <>
           {filteredAndSortedListings.length === 0 ? (
             <Card className="bg-neutral-900 border-neutral-700">
@@ -361,12 +422,20 @@ function ListingCard({ listing, getQualityColor, getCategoryColor }: ListingCard
         {/* Contact Number */}
         <a
           href={`tel:${listing.contact_number.replace(/\s/g, "")}`}
-          className="flex items-center gap-2 text-sm text-orange-500 hover:text-orange-400 transition-colors"
+          className="flex items-center gap-2 text-sm text-orange-500 hover:text-orange-400 transition-colors mb-4"
           aria-label={`Call ${listing.user_name} at ${listing.contact_number}`}
         >
           <Phone className="w-4 h-4" />
           <span>{listing.contact_number}</span>
         </a>
+
+        {/* More Details Button */}
+        <Link href={`/listings/${listing.id}`}>
+          <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+            More Details
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   )

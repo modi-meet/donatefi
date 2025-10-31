@@ -19,7 +19,7 @@ const mockLeaderboard: LeaderboardUser[] = [
   {
     id: "1",
     rank: 1,
-    name: "Sarah Johnson",
+    name: "Meet Modi",
     karmaPoints: 2450,
     listingsContributed: 12,
     itemsShared: 48,
@@ -27,7 +27,7 @@ const mockLeaderboard: LeaderboardUser[] = [
   {
     id: "2",
     rank: 2,
-    name: "Michael Chen",
+    name: "Aryan R",
     karmaPoints: 2180,
     listingsContributed: 10,
     itemsShared: 42,
@@ -35,7 +35,7 @@ const mockLeaderboard: LeaderboardUser[] = [
   {
     id: "3",
     rank: 3,
-    name: "Emma Rodriguez",
+    name: "Milan Sampath",
     karmaPoints: 1950,
     listingsContributed: 9,
     itemsShared: 38,
@@ -43,7 +43,7 @@ const mockLeaderboard: LeaderboardUser[] = [
   {
     id: "4",
     rank: 4,
-    name: "David Thompson",
+    name: "Mohammed Talha",
     karmaPoints: 1720,
     listingsContributed: 8,
     itemsShared: 35,

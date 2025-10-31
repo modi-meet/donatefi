@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ArrowRight, TrendingUp, Users, Gift, Award } from "lucide-react"
 import { mockListings } from "@/lib/mock-listings"
+import WalletStatus from "@/components/wallet-status"
 
 export default function HomePage() {
   // Get featured listings (first 3)
@@ -43,6 +44,15 @@ export default function HomePage() {
                 <Link href="/leaderboard">View Leaderboard</Link>
               </Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Wallet Status Section */}
+      <section className="py-8 border-b border-neutral-800">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md mx-auto">
+            <WalletStatus />
           </div>
         </div>
       </section>

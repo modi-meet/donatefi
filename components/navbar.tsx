@@ -4,28 +4,61 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Trophy, List, Star, Wallet } from "lucide-react"
+import { Trophy, List, Star, Wallet, AlertCircle, CheckCircle, Loader2, ShoppingBag, User, Package } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useWallet } from "@/contexts/wallet-context"
+import { useUser } from "@/contexts/user-context"
 
 export default function Navbar() {
   const pathname = usePathname()
-  const [walletConnected, setWalletConnected] = useState(false)
+  const { isConnected, address, balance, chainId, isLoading, error, connect, disconnect } = useWallet()
+  const { user } = useUser()
+  const [showError, setShowError] = useState(false)
 
   const navItems = [
     { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
     { href: "/listings", label: "Listings", icon: List },
     { href: "/karma", label: "Karma Points", icon: Star },
+    { href: "/marketplace", label: "Marketplace", icon: ShoppingBag },
   ]
 
-  const handleConnectWallet = () => {
-    // Simulate wallet connection
-    setWalletConnected(!walletConnected)
-    // In a real app, this would trigger wallet connection (MetaMask, WalletConnect, etc.)
-    console.log(walletConnected ? "Disconnecting wallet..." : "Connecting wallet...")
+  const handleWalletAction = async () => {
+    try {
+      setShowError(false)
+      if (isConnected) {
+        await disconnect()
+      } else {
+        await connect()
+      }
+    } catch (err) {
+      setShowError(true)
+      setTimeout(() => setShowError(false), 5000) // Hide error after 5 seconds
+    }
+  }
+
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`
+  }
+
+  const formatBalance = (bal: string) => {
+    return parseFloat(bal).toFixed(4)
+  }
+
+  const getChainName = (id: number) => {
+    switch (id) {
+      case 1:
+        return "Ethereum"
+      case 5:
+        return "Goerli"
+      case 11155111:
+        return "Sepolia"
+      default:
+        return `Chain ${id}`
+    }
   }
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-neutral-900/95 backdrop-blur supports-[backdrop-filter]:bg-neutral-900/60">
+    <nav className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-neutral-900/95 backdrop-blur supports-backdrop-filter:bg-neutral-900/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -81,15 +114,80 @@ export default function Navbar() {
 
           {/* Connect Wallet Button */}
           <div className="flex items-center gap-3">
+            {/* Error Message */}
+            {showError && error && (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-red-500/20 border border-red-500/50 rounded-md text-red-400 text-sm">
+                <AlertCircle className="w-4 h-4" />
+                <span className="max-w-48 truncate">{error}</span>
+              </div>
+            )}
+
+            {/* Wallet Info */}
+            {isConnected && address && (
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-neutral-800 border border-neutral-700 rounded-md text-sm">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span className="text-neutral-300">{formatAddress(address)}</span>
+                </div>
+                {balance && (
+                  <div className="text-neutral-500 border-l border-neutral-700 pl-2">
+                    {formatBalance(balance)} ETH
+                  </div>
+                )}
+                {chainId && chainId !== 1 && (
+                  <div className="text-orange-400 text-xs">
+                    {getChainName(chainId)}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Profile Button */}
+            {isConnected && (
+              <>
+                <Link href="/requests">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-neutral-400 hover:text-orange-500 hover:bg-neutral-800 relative"
+                    title="Requests"
+                  >
+                    <Package className="w-5 h-5" />
+                    {/* Badge for pending requests - can be enhanced later */}
+                  </Button>
+                </Link>
+                <Link href="/profile">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-neutral-400 hover:text-orange-500 hover:bg-neutral-800"
+                    title={user?.userName || "Profile"}
+                  >
+                    <User className="w-5 h-5" />
+                  </Button>
+                </Link>
+              </>
+            )}
+
             <Button
-              onClick={handleConnectWallet}
+              onClick={handleWalletAction}
+              disabled={isLoading}
               className={cn(
                 "bg-orange-500 hover:bg-orange-600 text-white",
-                walletConnected && "bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/50"
+                isConnected && "bg-green-500/20 hover:bg-green-500/30 text-green-400 border border-green-500/50"
               )}
             >
-              <Wallet className="w-4 h-4 mr-2" />
-              {walletConnected ? "Wallet Connected" : "Connect Wallet"}
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Wallet className="w-4 h-4 mr-2" />
+              )}
+              {isLoading 
+                ? "Connecting..." 
+                : isConnected 
+                  ? "Disconnect" 
+                  : "Connect Wallet"
+              }
             </Button>
           </div>
         </div>
@@ -116,6 +214,36 @@ export default function Navbar() {
                 </Link>
               )
             })}
+            
+            {/* Mobile Wallet Info */}
+            {isConnected && address && (
+              <div className="px-4 py-2 mt-2 border-t border-neutral-800">
+                <div className="flex items-center gap-2 text-sm text-neutral-300 mb-1">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>{formatAddress(address)}</span>
+                </div>
+                {balance && (
+                  <div className="text-sm text-neutral-500">
+                    Balance: {formatBalance(balance)} ETH
+                  </div>
+                )}
+                {chainId && chainId !== 1 && (
+                  <div className="text-xs text-orange-400 mt-1">
+                    Network: {getChainName(chainId)}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Mobile Error */}
+            {showError && error && (
+              <div className="px-4 py-2 mt-2 border-t border-neutral-800">
+                <div className="flex items-center gap-2 text-sm text-red-400">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>{error}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
