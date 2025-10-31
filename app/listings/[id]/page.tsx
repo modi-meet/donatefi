@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
@@ -16,28 +16,87 @@ import {
   CheckCircle,
   AlertCircle,
   Hash,
+  Loader2,
 } from "lucide-react"
-import { mockListings, type Listing } from "@/lib/mock-listings"
+import { supabase } from "@/lib/supabase"
+import { type Listing, mapDatabaseListingToListing } from "@/lib/listing-types"
 
 export default function ListingDetailsPage() {
   const params = useParams()
   const listingId = params.id as string
   
   const [requestSent, setRequestSent] = useState(false)
-  const [status] = useState<"available" | "claimed">("available")
+  const [listing, setListing] = useState<Listing | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Find the listing by ID
-  const listing = mockListings.find((l) => l.id === listingId)
+  // Fetch listing from Supabase
+  useEffect(() => {
+    const fetchListing = async () => {
+      try {
+        setLoading(true)
+        setError(null)
 
-  if (!listing) {
+        const { data, error: fetchError } = await supabase
+          .from('listings')
+          .select('*')
+          .eq('listing_id', listingId)
+          .single()
+
+        if (fetchError) {
+          throw fetchError
+        }
+
+        if (data) {
+          const mappedListing = mapDatabaseListingToListing(data)
+          setListing(mappedListing)
+        }
+      } catch (err: any) {
+        console.error('Error fetching listing:', err)
+        setError(err.message || 'Unable to load listing details.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (listingId) {
+      fetchListing()
+    }
+  }, [listingId])
+
+  // Determine status from listing (you may need to adjust based on your schema)
+  const status = listing ? ("available" as const) : ("claimed" as const)
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black p-6">
+        <div className="container mx-auto max-w-4xl">
+          <Card className="bg-neutral-900 border-neutral-700">
+            <CardContent className="p-12 text-center">
+              <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
+              <p className="text-neutral-400">Loading listing details...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  // Error or not found state
+  if (error || !listing) {
     return (
       <div className="min-h-screen bg-black p-6">
         <div className="container mx-auto max-w-4xl">
           <Card className="bg-neutral-900 border-neutral-700">
             <CardContent className="p-12 text-center">
               <AlertCircle className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Listing Not Found</h2>
-              <p className="text-neutral-400 mb-6">The listing you're looking for doesn't exist.</p>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {error ? "Unable to Load Listing" : "Listing Not Found"}
+              </h2>
+              <p className="text-neutral-400 mb-6">
+                {error || "The listing you're looking for doesn't exist."}
+              </p>
               <Link href="/listings">
                 <Button className="bg-orange-500 hover:bg-orange-600 text-white">
                   <ArrowLeft className="w-4 h-4 mr-2" />
