@@ -15,7 +15,7 @@ export const marketplaceItems: MarketplaceItem[] = [
     description: "Redeem for one standard movie ticket at participating theaters",
     cost: 250,
     category: "Entertainment",
-    imageUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=300&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&h=600&fit=crop&q=85",
     stock: 50,
   },
   {
@@ -24,7 +24,7 @@ export const marketplaceItems: MarketplaceItem[] = [
     description: "Get 20% off at select restaurants and cafes in your area",
     cost: 180,
     category: "Food",
-    imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop&q=85",
     stock: 100,
   },
   {
@@ -33,7 +33,7 @@ export const marketplaceItems: MarketplaceItem[] = [
     description: "Enjoy 30% off on clothing and accessories at partner stores",
     cost: 320,
     category: "Fashion",
-    imageUrl: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=300&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&h=600&fit=crop&q=85",
     stock: 75,
   },
   {
@@ -42,7 +42,7 @@ export const marketplaceItems: MarketplaceItem[] = [
     description: "Redeem for books worth up to $25 at participating bookstores",
     cost: 200,
     category: "Education",
-    imageUrl: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=300&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=800&h=600&fit=crop&q=85",
     stock: 60,
   },
   {
@@ -51,7 +51,7 @@ export const marketplaceItems: MarketplaceItem[] = [
     description: "Multi-purpose gift card redeemable at various retail partners",
     cost: 400,
     category: "General",
-    imageUrl: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=300&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&h=600&fit=crop&q=85",
     stock: 30,
   },
   {
@@ -60,7 +60,7 @@ export const marketplaceItems: MarketplaceItem[] = [
     description: "Free coffee or beverage at partner coffee shops (up to $6 value)",
     cost: 150,
     category: "Food",
-    imageUrl: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&h=600&fit=crop&q=85",
     stock: 120,
   },
   {
@@ -69,7 +69,7 @@ export const marketplaceItems: MarketplaceItem[] = [
     description: "Access to local sports events and gym facilities for one month",
     cost: 500,
     category: "Sports",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop&q=85",
     stock: 40,
   },
   {
@@ -78,7 +78,7 @@ export const marketplaceItems: MarketplaceItem[] = [
     description: "General admission ticket to community events and concerts",
     cost: 280,
     category: "Entertainment",
-    imageUrl: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=300&fit=crop",
+    imageUrl: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&h=600&fit=crop&q=85",
     stock: 80,
   },
 ]

@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
 import {
   Search,
   MapPin,
@@ -16,6 +17,7 @@ import {
   Filter,
   SortAsc,
   Loader2,
+  ArrowRight,
 } from "lucide-react"
 import { mockListings, type Listing } from "@/lib/mock-listings"
 
@@ -361,12 +363,20 @@ function ListingCard({ listing, getQualityColor, getCategoryColor }: ListingCard
         {/* Contact Number */}
         <a
           href={`tel:${listing.contact_number.replace(/\s/g, "")}`}
-          className="flex items-center gap-2 text-sm text-orange-500 hover:text-orange-400 transition-colors"
+          className="flex items-center gap-2 text-sm text-orange-500 hover:text-orange-400 transition-colors mb-4"
           aria-label={`Call ${listing.user_name} at ${listing.contact_number}`}
         >
           <Phone className="w-4 h-4" />
           <span>{listing.contact_number}</span>
         </a>
+
+        {/* More Details Button */}
+        <Link href={`/listings/${listing.id}`}>
+          <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white">
+            More Details
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </Link>
       </CardContent>
     </Card>
   )
