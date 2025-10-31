@@ -61,7 +61,7 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="text-xl font-bold text-orange-500 tracking-wider">COMMUNITY</div>
+            <div className="text-xl font-bold text-orange-500 tracking-wider">DonateFi</div>
           </Link>
 
           {/* Navigation Links */}
