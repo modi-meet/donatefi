@@ -26,7 +26,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-              Welcome to <span className="text-orange-500">Community</span>
+              Welcome to <span className="text-orange-500">DonateFi</span>
             </h1>
             <p className="text-xl text-neutral-400 mb-8 max-w-2xl mx-auto">
               Join a thriving community where neighbors share resources, build connections, and make a positive impact

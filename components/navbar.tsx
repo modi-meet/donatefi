@@ -28,9 +28,9 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-neutral-900/95 backdrop-blur supports-[backdrop-filter]:bg-neutral-900/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
+          {/* Logo */}``
           <Link href="/" className="flex items-center gap-2">
-            <div className="text-xl font-bold text-orange-500 tracking-wider">COMMUNITY</div>
+            <div className="text-xl font-bold text-orange-500 tracking-wider">DonateFi</div>
           </Link>
 
           {/* Navigation Links */}
