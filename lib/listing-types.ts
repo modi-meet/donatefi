@@ -4,6 +4,7 @@ export interface DatabaseListing {
   user_name: string
   user_profile_number: string
   user_address: string
+  wallet_address?: string // Optional - owner's wallet address
   category: 'Food' | 'Education' | 'Cloth' | 'Others'
   title: string
   description: string
@@ -23,6 +24,7 @@ export interface Listing {
   user_name: string
   user_profile_number: string
   user_address: string
+  walletAddress?: string // Owner's wallet address
   category: 'Food' | 'Education' | 'Cloth' | 'Others'
   title: string
   description: string
@@ -40,6 +42,7 @@ export function mapDatabaseListingToListing(dbListing: DatabaseListing): Listing
     user_name: dbListing.user_name,
     user_profile_number: dbListing.user_profile_number,
     user_address: dbListing.user_address,
+    walletAddress: dbListing.wallet_address,
     category: dbListing.category,
     title: dbListing.title,
     description: dbListing.description || '',

@@ -20,15 +20,20 @@ import {
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { type Listing, mapDatabaseListingToListing } from "@/lib/listing-types"
+import { RequestService } from "@/lib/request-service"
+import { UserService } from "@/lib/user-service"
+import { useWallet } from "@/contexts/wallet-context"
 
 export default function ListingDetailsPage() {
   const params = useParams()
   const listingId = params.id as string
+  const { isConnected, address } = useWallet()
   
   const [requestSent, setRequestSent] = useState(false)
   const [listing, setListing] = useState<Listing | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [sendingRequest, setSendingRequest] = useState(false)
 
   // Fetch listing from Supabase
   useEffect(() => {
@@ -110,14 +115,51 @@ export default function ListingDetailsPage() {
     )
   }
 
-  const handleReceiveItem = () => {
-    if (status === "available") {
-      setRequestSent(true)
-      // In a real app, this would trigger an API call or transaction
-      setTimeout(() => {
-        // Reset after 3 seconds for demo purposes
-        // setRequestSent(false)
-      }, 3000)
+  const handleReceiveItem = async () => {
+    if (!isConnected || !address) {
+      setError("Please connect your wallet first")
+      return
+    }
+
+    if (!listing) {
+      setError("Listing not found")
+      return
+    }
+
+    try {
+      setSendingRequest(true)
+      setError(null)
+
+      // Get owner's wallet address
+      let ownerWalletAddress = listing.walletAddress
+
+      // If wallet address not in listing, try to find by user_name
+      if (!ownerWalletAddress && listing.user_name) {
+        ownerWalletAddress = await UserService.getWalletAddressByUserName(listing.user_name)
+      }
+
+      if (!ownerWalletAddress) {
+        throw new Error("Unable to find listing owner's wallet address")
+      }
+
+      // Create request
+      const request = await RequestService.createRequest(
+        listing.id,
+        address.toLowerCase(),
+        ownerWalletAddress.toLowerCase()
+      )
+
+      if (request) {
+        setRequestSent(true)
+      } else {
+        throw new Error("Failed to create request")
+      }
+    } catch (err: any) {
+      console.error('Error creating request:', err)
+      setError(err.message || "Failed to send request. Please try again.")
+      setRequestSent(false)
+    } finally {
+      setSendingRequest(false)
     }
   }
 
@@ -231,6 +273,15 @@ export default function ListingDetailsPage() {
                   </div>
                 </div>
 
+                {error && (
+                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                    <div className="flex items-center gap-2 text-red-400 text-sm">
+                      <AlertCircle className="w-4 h-4" />
+                      <span>{error}</span>
+                    </div>
+                  </div>
+                )}
+
                 {requestSent ? (
                   <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
@@ -238,22 +289,31 @@ export default function ListingDetailsPage() {
                       <span className="font-semibold text-green-400">Request Sent!</span>
                     </div>
                     <p className="text-sm text-neutral-300">
-                      Your request to receive this item has been sent. The donor will contact you soon.
+                      Your request to receive this item has been sent. The donor will be notified and contact you soon.
                     </p>
                   </div>
                 ) : (
                   <Button
                     onClick={handleReceiveItem}
-                    disabled={status !== "available"}
+                    disabled={status !== "available" || !isConnected || sendingRequest}
                     className={`w-full ${
-                      status === "available"
+                      status === "available" && isConnected
                         ? "bg-orange-500 hover:bg-orange-600 text-white"
                         : "bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700"
                     }`}
                     size="lg"
                   >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    Receive This Item
+                    {sendingRequest ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Sending Request...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        {!isConnected ? "Connect Wallet to Request" : "Receive This Item"}
+                      </>
+                    )}
                   </Button>
                 )}
               </CardContent>

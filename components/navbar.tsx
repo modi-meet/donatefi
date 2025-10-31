@@ -4,13 +4,15 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Trophy, List, Star, Wallet, AlertCircle, CheckCircle, Loader2, ShoppingBag } from "lucide-react"
+import { Trophy, List, Star, Wallet, AlertCircle, CheckCircle, Loader2, ShoppingBag, User, Package } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useWallet } from "@/contexts/wallet-context"
+import { useUser } from "@/contexts/user-context"
 
 export default function Navbar() {
   const pathname = usePathname()
   const { isConnected, address, balance, chainId, isLoading, error, connect, disconnect } = useWallet()
+  const { user } = useUser()
   const [showError, setShowError] = useState(false)
 
   const navItems = [
@@ -138,6 +140,33 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Profile Button */}
+            {isConnected && (
+              <>
+                <Link href="/requests">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-neutral-400 hover:text-orange-500 hover:bg-neutral-800 relative"
+                    title="Requests"
+                  >
+                    <Package className="w-5 h-5" />
+                    {/* Badge for pending requests - can be enhanced later */}
+                  </Button>
+                </Link>
+                <Link href="/profile">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-neutral-400 hover:text-orange-500 hover:bg-neutral-800"
+                    title={user?.userName || "Profile"}
+                  >
+                    <User className="w-5 h-5" />
+                  </Button>
+                </Link>
+              </>
             )}
 
             <Button
